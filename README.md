@@ -1,1 +1,5 @@
-# ANALIZADOR-SIAT-HISTORICO-DUPLICADOS
+pandas
+openpyxl
+gspread
+google-auth
+gspread-dataframe
