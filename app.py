@@ -15,7 +15,6 @@ st.set_page_config(page_title="Gestión Contable | UNIVALLE", page_icon="🎓", 
 # --- CONEXIÓN A GOOGLE SHEETS ---
 @st.cache_resource
 def init_connection():
-    # Leer las credenciales de los secretos de Streamlit
     creds_dict = json.loads(st.secrets["google_credentials_json"])
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
@@ -23,15 +22,14 @@ def init_connection():
     ]
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     client = gspread.authorize(creds)
-    # Abrir el documento mediante la URL
     return client.open_by_url(st.secrets["spreadsheet_url"])
 
-# --- FUNCIONES DE BASE DE DATOS EN LA NUBE ---
+# --- FUNCIONES DE BASE DE DATOS EN LA NUBE (CON CACHÉ) ---
+@st.cache_data(ttl=600)  # Guarda en memoria por 10 minutos para mayor velocidad
 def cargar_historico():
     try:
         sheet = init_connection()
         ws = sheet.worksheet("HISTORICO_FACTURAS")
-        # Leer datos y limpiar filas/columnas vacías
         df = get_as_dataframe(ws).dropna(how='all').dropna(axis=1, how='all')
         if df.empty or 'CUF / Autorización' not in df.columns:
             return pd.DataFrame(columns=["Fecha", "Razón Social", "NIT", "Nro Factura", "Monto (Bs)", "CUF / Autorización"])
@@ -46,7 +44,10 @@ def guardar_historico(df_nuevo):
     df_final = pd.concat([df_actual, df_nuevo], ignore_index=True)
     ws.clear()
     set_with_dataframe(ws, df_final)
+    # Limpia la caché para que reconozca los nuevos datos la próxima vez
+    cargar_historico.clear()
 
+@st.cache_data(ttl=600)
 def cargar_siat_maestro():
     try:
         sheet = init_connection()
@@ -65,13 +66,13 @@ def guardar_siat_maestro(df_nuevo):
     
     if df_actual is not None and not df_actual.empty:
         df_combinado = pd.concat([df_actual, df_nuevo], ignore_index=True)
-        # Limpiar duplicados manteniendo el más reciente
         df_combinado = df_combinado.drop_duplicates(subset=['CODIGO DE AUTORIZACION'], keep='last')
     else:
         df_combinado = df_nuevo
         
     ws.clear()
     set_with_dataframe(ws, df_combinado)
+    cargar_siat_maestro.clear()
 
 # --- ESTILOS CSS PROFESIONALES ---
 st.markdown("""
@@ -84,7 +85,7 @@ st.markdown("""
     [data-testid="stFileUploaderFileName"], [data-testid="stFileUploaderFileData"], 
     [data-testid="stFileUploader"] small { color: #b8860b !important; opacity: 1 !important; }
     [data-testid="stFileUploader"] button { background-color: #741b28 !important; color: white !important; border: 1px solid #b8860b !important; }
-    .stButton > button { border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+    .stButton > button { border-radius: 4px; font-weight: 600; text-transform: uppercase; transition: all 0.3s ease; }
     div.stButton > button:first-child:not([kind="primary"]) { background-color: #741b28 !important; color: #ffffff !important; border: 1px solid #b8860b !important; }
     .stButton > button[kind="primary"] { background-color: #741b28 !important; color: #ffffff !important; border: 1px solid #b8860b !important; height: 3em; }
     h1, h2, h3 { color: #741b28; font-family: 'Times New Roman', serif; }
@@ -123,7 +124,8 @@ with st.sidebar:
             df_diario.columns = [c.strip() for c in df_diario.columns]
             df_diario = df_diario.map(lambda x: x.strip() if isinstance(x, str) else x)
             
-            guardar_siat_maestro(df_diario)
+            with st.spinner("Guardando base en Google Sheets..."):
+                guardar_siat_maestro(df_diario)
             st.success("✅ Base diaria respaldada en la nube con éxito")
         except Exception as e:
             st.error(f"Error en la lectura: {e}")
@@ -164,7 +166,7 @@ if base_siat is not None:
         duplicados = 0
         nuevos_registros_df = []
         
-        with st.spinner("Validando facturas en la base de datos..."):
+        with st.spinner("Procesando y validando facturas..."):
             for link in links:
                 try:
                     link_clean = link.strip().rstrip(',').rstrip(';')
