@@ -4,39 +4,74 @@ from urllib.parse import urlparse, parse_qs
 from io import BytesIO, StringIO
 import os
 import re
+import json
+import gspread
+from google.oauth2.service_account import Credentials
+from gspread_dataframe import set_with_dataframe, get_as_dataframe
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Gestión Contable | UNIVALLE", page_icon="🎓", layout="wide")
 
-# --- NOMBRES DE BASES DE DATOS LOCALES ---
-FILE_SIAT = "DB_SIAT_MAESTRO.csv"
-FILE_HISTORICO = "DB_HISTORICO_FACTURAS.csv"
+# --- CONEXIÓN A GOOGLE SHEETS ---
+@st.cache_resource
+def init_connection():
+    # Leer las credenciales de los secretos de Streamlit
+    creds_dict = json.loads(st.secrets["google_credentials_json"])
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+    client = gspread.authorize(creds)
+    # Abrir el documento mediante la URL
+    return client.open_by_url(st.secrets["spreadsheet_url"])
 
-# --- FUNCIONES DE BASE DE DATOS LOCAL ---
+# --- FUNCIONES DE BASE DE DATOS EN LA NUBE ---
 def cargar_historico():
-    if os.path.exists(FILE_HISTORICO):
-        return pd.read_csv(FILE_HISTORICO)
-    return pd.DataFrame(columns=["Fecha", "Razón Social", "NIT", "Nro Factura", "Monto (Bs)", "CUF / Autorización"])
-
-def cargar_siat_maestro():
-    if os.path.exists(FILE_SIAT):
-        return pd.read_csv(FILE_SIAT)
-    return None
+    try:
+        sheet = init_connection()
+        ws = sheet.worksheet("HISTORICO_FACTURAS")
+        # Leer datos y limpiar filas/columnas vacías
+        df = get_as_dataframe(ws).dropna(how='all').dropna(axis=1, how='all')
+        if df.empty or 'CUF / Autorización' not in df.columns:
+            return pd.DataFrame(columns=["Fecha", "Razón Social", "NIT", "Nro Factura", "Monto (Bs)", "CUF / Autorización"])
+        return df
+    except Exception as e:
+        return pd.DataFrame(columns=["Fecha", "Razón Social", "NIT", "Nro Factura", "Monto (Bs)", "CUF / Autorización"])
 
 def guardar_historico(df_nuevo):
+    sheet = init_connection()
+    ws = sheet.worksheet("HISTORICO_FACTURAS")
     df_actual = cargar_historico()
-    df_actual = pd.concat([df_actual, df_nuevo], ignore_index=True)
-    df_actual.to_csv(FILE_HISTORICO, index=False)
+    df_final = pd.concat([df_actual, df_nuevo], ignore_index=True)
+    ws.clear()
+    set_with_dataframe(ws, df_final)
+
+def cargar_siat_maestro():
+    try:
+        sheet = init_connection()
+        ws = sheet.worksheet("SIAT_MAESTRO")
+        df = get_as_dataframe(ws).dropna(how='all').dropna(axis=1, how='all')
+        if df.empty:
+            return None
+        return df
+    except:
+        return None
 
 def guardar_siat_maestro(df_nuevo):
+    sheet = init_connection()
+    ws = sheet.worksheet("SIAT_MAESTRO")
     df_actual = cargar_siat_maestro()
-    if df_actual is not None:
-        # Unir y eliminar duplicados por si suben la misma base varias veces
+    
+    if df_actual is not None and not df_actual.empty:
         df_combinado = pd.concat([df_actual, df_nuevo], ignore_index=True)
+        # Limpiar duplicados manteniendo el más reciente
         df_combinado = df_combinado.drop_duplicates(subset=['CODIGO DE AUTORIZACION'], keep='last')
-        df_combinado.to_csv(FILE_SIAT, index=False)
     else:
-        df_nuevo.to_csv(FILE_SIAT, index=False)
+        df_combinado = df_nuevo
+        
+    ws.clear()
+    set_with_dataframe(ws, df_combinado)
 
 # --- ESTILOS CSS PROFESIONALES ---
 st.markdown("""
@@ -74,7 +109,7 @@ with st.sidebar:
     st.markdown("<h4 style='text-align: center;'>INSTRUMENTO DE CONTROL CONTABLE</h4>", unsafe_allow_html=True)
     st.divider()
     
-    archivo_csv = st.file_uploader("Vincular Base SIAT Diaria (.csv)", type=['csv'], help="Sube la base del día. Se acumulará al histórico automáticamente.")
+    archivo_csv = st.file_uploader("Vincular Base SIAT Diaria (.csv)", type=['csv'], help="Se guardará automáticamente en Google Sheets.")
     
     if archivo_csv:
         try:
@@ -86,28 +121,25 @@ with st.sidebar:
             
             df_diario = pd.read_csv(StringIO(decoded_content), sep=',', on_bad_lines='skip')
             df_diario.columns = [c.strip() for c in df_diario.columns]
-            
-            # Limpieza y mapeo (Versión compatible con Pandas modernos)
             df_diario = df_diario.map(lambda x: x.strip() if isinstance(x, str) else x)
             
-            # Guardar en la base maestra
             guardar_siat_maestro(df_diario)
-            st.success("✅ Base diaria añadida al maestro con éxito")
+            st.success("✅ Base diaria respaldada en la nube con éxito")
         except Exception as e:
             st.error(f"Error en la lectura: {e}")
     
     st.divider()
     
-    # --- ESTADÍSTICAS DEL SISTEMA ---
+    # --- ESTADÍSTICAS DEL SISTEMA (DESDE LA NUBE) ---
     df_historico_actual = cargar_historico()
     df_siat_actual = cargar_siat_maestro()
     
-    st.write("📊 **Estadísticas del Sistema:**")
-    st.write(f"- Facturas en SIAT (Maestro): {len(df_siat_actual) if df_siat_actual is not None else 0}")
-    st.write(f"- Facturas Procesadas (Histórico): {len(df_historico_actual)}")
+    st.write("☁️ **Estadísticas en la Nube:**")
+    st.write(f"- Base Maestra: {len(df_siat_actual) if df_siat_actual is not None else 0} registros")
+    st.write(f"- Facturas Procesadas: {len(df_historico_actual)}")
     
     st.divider()
-    if st.button("🔄 Limpiar Pantalla", use_container_width=True, help="Limpia la vista actual, pero NO borra el historial guardado."):
+    if st.button("🔄 Limpiar Pantalla", use_container_width=True, help="Limpia la vista. Los datos en Google Sheets están a salvo."):
         st.session_state.registros_sesion = []
         st.rerun()
 
@@ -125,64 +157,61 @@ if base_siat is not None:
     if st.button("🚀 EJECUTAR PROCESAMIENTO DE DATOS", type="primary", use_container_width=True):
         links = re.findall(r'https?://[^\s]+?(?=https?://|$)', urls_raw)
         
-        # Cargar historial justo en este momento para validación
         historico_db = cargar_historico()
-        cufs_historicos = historico_db['CUF / Autorización'].tolist()
+        cufs_historicos = historico_db['CUF / Autorización'].tolist() if not historico_db.empty else []
         
         agregados = 0
         duplicados = 0
         nuevos_registros_df = []
         
-        for link in links:
-            try:
-                link_clean = link.strip().rstrip(',').rstrip(';')
-                params = parse_qs(urlparse(link_clean).query)
-                cuf_extraido = params.get('cuf', [''])[0].strip()
-                
-                if not cuf_extraido:
-                    continue
+        with st.spinner("Validando facturas en la base de datos..."):
+            for link in links:
+                try:
+                    link_clean = link.strip().rstrip(',').rstrip(';')
+                    params = parse_qs(urlparse(link_clean).query)
+                    cuf_extraido = params.get('cuf', [''])[0].strip()
+                    
+                    if not cuf_extraido:
+                        continue
 
-                # 1. VALIDACIÓN ANTI-DUPLICADOS
-                if cuf_extraido in cufs_historicos or any(d['CUF / Autorización'] == cuf_extraido for d in st.session_state.registros_sesion):
-                    duplicados += 1
-                    continue
+                    # 1. VALIDACIÓN ANTI-DUPLICADOS
+                    if cuf_extraido in cufs_historicos or any(d['CUF / Autorización'] == cuf_extraido for d in st.session_state.registros_sesion):
+                        duplicados += 1
+                        continue
 
-                # 2. BÚSQUEDA EN SIAT
-                match = base_siat[base_siat['CODIGO DE AUTORIZACION'] == cuf_extraido]
-                
-                if not match.empty:
-                    item = match.iloc[0]
+                    # 2. BÚSQUEDA EN SIAT
+                    match = base_siat[base_siat['CODIGO DE AUTORIZACION'] == cuf_extraido]
                     
-                    # Corrección robusta de caracteres (ej. "Ã")
-                    rs_raw = str(item['RAZON SOCIAL PROVEEDOR'])
-                    try:
-                        razon_social = rs_raw.encode('latin1').decode('utf-8') if "Ã" in rs_raw else rs_raw
-                    except:
-                        razon_social = rs_raw
-                    
-                    nuevo_registro = {
-                        "Fecha": item['FECHA DE FACTURA/DUI/DIM'],
-                        "Razón Social": razon_social,
-                        "NIT": item['NIT PROVEEDOR'],
-                        "Nro Factura": item['NUMERO FACTURA'],
-                        "Monto (Bs)": item['IMPORTE TOTAL COMPRA'],
-                        "CUF / Autorización": cuf_extraido
-                    }
-                    
-                    st.session_state.registros_sesion.append(nuevo_registro)
-                    nuevos_registros_df.append(nuevo_registro)
-                    agregados += 1
-            except:
-                continue
-        
-        # 3. GUARDADO DE NUEVOS REGISTROS
-        if nuevos_registros_df:
-            guardar_historico(pd.DataFrame(nuevos_registros_df))
-            st.success(f"Operación exitosa: {agregados} registros nuevos validados y guardados en la base de datos.")
-        
-        # 4. ADVERTENCIA DE DUPLICADOS
-        if duplicados > 0:
-            st.markdown(f"<div class='alerta-duplicado'>⚠️ ALERTA DE SISTEMA: Se bloquearon {duplicados} facturas repetidas (Ya se encontraban procesadas en el historial).</div>", unsafe_allow_html=True)
+                    if not match.empty:
+                        item = match.iloc[0]
+                        rs_raw = str(item['RAZON SOCIAL PROVEEDOR'])
+                        try:
+                            razon_social = rs_raw.encode('latin1').decode('utf-8') if "Ã" in rs_raw else rs_raw
+                        except:
+                            razon_social = rs_raw
+                        
+                        nuevo_registro = {
+                            "Fecha": item['FECHA DE FACTURA/DUI/DIM'],
+                            "Razón Social": razon_social,
+                            "NIT": item['NIT PROVEEDOR'],
+                            "Nro Factura": item['NUMERO FACTURA'],
+                            "Monto (Bs)": item['IMPORTE TOTAL COMPRA'],
+                            "CUF / Autorización": cuf_extraido
+                        }
+                        
+                        st.session_state.registros_sesion.append(nuevo_registro)
+                        nuevos_registros_df.append(nuevo_registro)
+                        agregados += 1
+                except:
+                    continue
+            
+            # 3. GUARDADO DE NUEVOS REGISTROS EN LA NUBE
+            if nuevos_registros_df:
+                guardar_historico(pd.DataFrame(nuevos_registros_df))
+                st.success(f"Operación exitosa: {agregados} registros validados y subidos a Google Sheets.")
+            
+            if duplicados > 0:
+                st.markdown(f"<div class='alerta-duplicado'>⚠️ ALERTA DE SISTEMA: Se bloquearon {duplicados} facturas repetidas (Ya se encontraban procesadas en el historial de la nube).</div>", unsafe_allow_html=True)
 
 # --- REPORTES Y EXPORTACIÓN ---
 if st.session_state.registros_sesion:
@@ -198,7 +227,7 @@ if st.session_state.registros_sesion:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("#### 📥 Descargar Historial Completo del Mes")
+    st.markdown("#### 📥 Descargar Historial Completo de la Nube")
     df_historico_completo = cargar_historico()
     st.dataframe(df_historico_completo, use_container_width=True)
     
@@ -209,14 +238,14 @@ if st.session_state.registros_sesion:
     st.download_button(
         label="DESCARGAR INFORME TÉCNICO COMPLETO (EXCEL)",
         data=buff.getvalue(),
-        file_name="Procesamiento_Datos_Mensual_UNIVALLE.xlsx",
+        file_name="Reporte_Nube_UNIVALLE.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
 else:
     if base_siat is None:
-        st.info("📌 Sistema operativo. Por favor, vincule la base de datos diaria en el panel izquierdo para iniciar.")
+        st.info("📌 Sistema conectado a la nube. Por favor, vincule la base de datos diaria para iniciar.")
     else:
-        st.info("📌 Base de datos operativa. Deposite los enlaces para iniciar el procesamiento.")
+        st.info("📌 Base maestra conectada. Deposite los enlaces para iniciar el procesamiento.")
 
 st.markdown("<br><p style='text-align: center; color: #741b28; opacity: 0.6;'>DEPARTAMENTO DE CONTABILIDAD | UNIVALLE S.A. © 2026</p>", unsafe_allow_html=True)
