@@ -1,0 +1,97 @@
+{
+  "fecha": "2026-10-21T12:21:25.159196-04:00",
+  "tipo": "Validación estática; sin importación ni ejecución en tenant",
+  "comando": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "pruebas/validar.py",
+    "--referencias",
+    "/workspace/referencias-caja-ayacucho",
+    "--informe",
+    "evidencia/validacion.json"
+  ],
+  "python": "3.12.14",
+  "pruebas": [
+    {
+      "prueba": "integridad_zip_y_json_estricto",
+      "resultado": "PASS",
+      "detalle": {
+        "archivos_json": 5,
+        "bytes": 3411
+      }
+    },
+    {
+      "prueba": "estructura_identidad_dependencias_y_destinos",
+      "resultado": "PASS",
+      "detalle": {
+        "recursos_flujo": 1,
+        "conexiones": 0,
+        "nombre": "CAJA AYACUCHO - 00 PRUEBA HTTP"
+      }
+    },
+    {
+      "prueba": "definicion_auxiliares_y_todos_los_json",
+      "resultado": "PASS",
+      "detalle": {
+        "json_locales_leidos": 9
+      }
+    },
+    {
+      "prueba": "grafo_guardas_http_timeout_y_errores",
+      "resultado": "PASS",
+      "detalle": null
+    },
+    {
+      "prueba": "casos_sinteticos_expresiones",
+      "resultado": "PASS",
+      "detalle": {
+        "casos_url": 19,
+        "casos_resultado": 19,
+        "tipo": "evaluación local limitada; no ejecución Power Automate"
+      }
+    },
+    {
+      "prueba": "sensibilidad_del_validador",
+      "resultado": "PASS",
+      "detalle": {
+        "mutaciones_rechazadas": 9
+      }
+    },
+    {
+      "prueba": "esquema_publicado_wdl",
+      "resultado": "PASS",
+      "detalle": {
+        "esquema": "Microsoft Logic Apps WDL; no certifica importador de paquetes Power Automate",
+        "errores": 0
+      }
+    },
+    {
+      "prueba": "regeneracion_determinista",
+      "resultado": "PASS",
+      "detalle": {
+        "reconstrucciones_limpias": 2,
+        "comparacion": "byte a byte"
+      }
+    },
+    {
+      "prueba": "sha256_entregable",
+      "resultado": "PASS",
+      "detalle": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d"
+    },
+    {
+      "prueba": "referencias_fijadas_y_metodo_de_empaquetado",
+      "resultado": "PASS",
+      "detalle": {
+        "commit": "456ca36efb3124e34295c911aff7833f6a7eacdb",
+        "archivos_comprobados": 5,
+        "identificadores_heredados": 0
+      }
+    }
+  ],
+  "resultado": "PASS",
+  "limitaciones": [
+    "El evaluador local no implementa el motor Power Automate.",
+    "El esquema WDL no certifica el importador de paquetes ni valida semántica de expresiones.",
+    "Timeout efectivo, número de solicitudes de red, redirecciones, licencia Premium y DLP pendientes de prueba real.",
+    "Cancelación manual de una ejecución no garantiza que se ejecute su diagnóstico."
+  ]
+}
