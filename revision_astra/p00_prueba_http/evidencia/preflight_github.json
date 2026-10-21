@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "ok": false,
+    "message": "Resource not accessible by integration",
+    "status": "403",
+    "stderr": "gh: Resource not accessible by integration (HTTP 403)\n"
+  },
+  "workflows": {
+    "ok": true,
+    "total_count": 0,
+    "workflows": []
+  },
+  "deployments": {
+    "ok": true,
+    "deployments": []
+  },
+  "runs": {
+    "ok": true,
+    "total_count": 0,
+    "runs": []
+  },
+  "pages": {
+    "ok": false,
+    "message": "Not Found",
+    "status": "404",
+    "stderr": "gh: Not Found (HTTP 404)\n"
+  }
+}

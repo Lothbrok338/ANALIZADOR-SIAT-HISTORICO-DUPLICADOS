@@ -1,0 +1,69 @@
+{
+  "fecha": "2026-10-21T12:35:06.515064-04:00",
+  "rama_actual": "caja-ayacucho/p00-prueba-http",
+  "commit_desarrollo": "06232da9f7602b92696c1c4be57dbe25be04efec",
+  "estado_git_inicial": "limpio",
+  "estado_git_final": "solo archivos nuevos bajo revision_astra/p00_prueba_http/; sin cambios en implementación original",
+  "remotos_configurados": [
+    {
+      "nombre": "origin",
+      "fetch": "https://github.com/Lothbrok338/ANALIZADOR-SIAT-HISTORICO-DUPLICADOS.git",
+      "push": "https://github.com/Lothbrok338/ANALIZADOR-SIAT-HISTORICO-DUPLICADOS.git"
+    }
+  ],
+  "repositorio_github_destino": "Lothbrok338/ANALIZADOR-SIAT-HISTORICO-DUPLICADOS",
+  "despliegues": {
+    "configuracion_local_detectada": [],
+    "integraciones_remotas": "Webhooks no verificables por 403. Usuario acepta expresamente la incertidumbre y ordena no continuar investigando.",
+    "se_puede_descartar_activacion_remota": false,
+    "rama_remota_objetivo_existente": false,
+    "rama_remota_existente": {
+      "nombre": "main",
+      "sha": "53957260a11e07b79b941edd245f28dbcdfa7d69"
+    },
+    "workflows_configurados": 0,
+    "ejecuciones_actions": 0,
+    "despliegues_registrados": 0,
+    "github_pages": "404 Not Found",
+    "consulta_hooks": "403 Resource not accessible by integration"
+  },
+  "integridad": {
+    "sha256_esperado": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d",
+    "sha256_observado": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d",
+    "regeneracion_desde_src": "idéntica byte a byte",
+    "pruebas_originales_desde_copia": "10/10 PASS; 19 casos URL, 19 resultados, 9 mutaciones; dos regeneraciones internas",
+    "copias_originales": "13/13 idénticas al commit de desarrollo"
+  },
+  "revision_contenido": {
+    "archivos_antes_de_esta_evidencia": 20,
+    "cambios_ajenos": false,
+    "patrones_secretos_detectados": 0,
+    "destinos_productivos_detectados": 0,
+    "caches_entornos_o_dependencias_instaladas": false,
+    "hosts_en_textos": [
+      "github.com",
+      "json-schema.org",
+      "learn.microsoft.com",
+      "otro.invalid",
+      "pendiente-url-pruebas.invalid",
+      "pruebas.example",
+      "schema.management.azure.com"
+    ]
+  },
+  "publicacion": {
+    "estado": "AUTORIZADA_CON_INCERTIDUMBRE_ACEPTADA",
+    "autorizacion_usuario": "No puedo confirmar la ausencia de webhooks o servicios externos. Aun así, autorizo el commit y push de esta entrega a la rama caja-ayacucho/p00-prueba-http, aceptando esa incertidumbre.",
+    "limites": [
+      "No continuar investigando webhooks.",
+      "No ejecutar comandos de despliegue.",
+      "No modificar integraciones.",
+      "No hacer merge.",
+      "Publicar únicamente la entrega de revisión."
+    ],
+    "push_realizado_al_emitir_este_registro": false,
+    "pr_creado": false,
+    "release_publicada": false
+  },
+  "estado_tenant": "Validación estática realizada. Importación y ejecución en el tenant pendientes.",
+  "momento": "Comprobación previa al commit y push; el resultado de publicación se verifica después con GitHub."
+}

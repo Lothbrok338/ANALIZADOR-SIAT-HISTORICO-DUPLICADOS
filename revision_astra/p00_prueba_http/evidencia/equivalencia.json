@@ -1,0 +1,97 @@
+{
+  "commit_desarrollo": "06232da9f7602b92696c1c4be57dbe25be04efec",
+  "sha256_zip": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d",
+  "archivos": [
+    {
+      "original": "flujo/construir.py",
+      "copia_revision": "src/construir.py",
+      "sha256": "9fe40ecd3361ad32fab8ad3ac30774c22f128b34480235c9cefe70fbe82ac5fd",
+      "bytes": 10468,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "flujo/CAJA_AYACUCHO_00_PRUEBA_HTTP_definition.json",
+      "copia_revision": "src/definition.json",
+      "sha256": "22d10835dec6e084571a6b1b603d2ce78d23eba2bef5bf1cb8d3e7cc6f779388",
+      "bytes": 8168,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "pruebas/validar.py",
+      "copia_revision": "tests/validar.py",
+      "sha256": "0468fcf57b66890dc7168b543e8510f68c469b2cc65ed969c54a623aa36ac21f",
+      "bytes": 21730,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "pruebas/expresiones.py",
+      "copia_revision": "tests/expresiones.py",
+      "sha256": "944301f49db211bec73040501e9b35cf31ab43a4a7da25149ef5613aae7bbeff",
+      "bytes": 4087,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "vendor/workflowdefinition.schema.json",
+      "copia_revision": "src/vendor/workflowdefinition.schema.json",
+      "sha256": "7795118ae8a8dcfe7bdf0b84229be08cde8bc7ebd9eeac9e6c372746c520499d",
+      "bytes": 147324,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "vendor/README.md",
+      "copia_revision": "src/vendor/README.md",
+      "sha256": "9cc12feaaa2bc6126b1f19fae611c30b0e6f1ed543765e4fe1f13a7bba68650a",
+      "bytes": 496,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "requirements-validacion.txt",
+      "copia_revision": "src/requirements-validacion.txt",
+      "sha256": "756cc9e506ae4ee1a6f6c0507088b5cfc0dc8ba350fb2d2d46f1ffa72033adb6",
+      "bytes": 19,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "evidencia/origen.json",
+      "copia_revision": "evidencia/origen.json",
+      "sha256": "18437f2f979c8c46507324d1f37114d379f2d0571a935670b21a6b96900cce27",
+      "bytes": 2689,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "evidencia/validacion.json",
+      "copia_revision": "evidencia/validacion_original.json",
+      "sha256": "4b0cd0a2401d5ed7a410615d9fd07a0c6f912e71c4d01c9b93a1f0a8f39eef97",
+      "bytes": 2746,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "INFORME_VALIDACION.md",
+      "copia_revision": "INFORME_VALIDACION.md",
+      "sha256": "9c646f8a717e1c1158510cb8b77c0fd9fc077952c7a559bf178bffd652aa925a",
+      "bytes": 9250,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "INSTRUCCIONES_IMPORTACION.md",
+      "copia_revision": "INSTRUCCIONES_IMPORTACION.md",
+      "sha256": "f27171520be45a7bc864e78874f91e7c025127feb71de19269443a8361a2d71a",
+      "bytes": 5160,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "dist/CAJA_AYACUCHO_00_PRUEBA_HTTP.zip",
+      "copia_revision": "dist/CAJA_AYACUCHO_00_PRUEBA_HTTP.zip",
+      "sha256": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d",
+      "bytes": 3411,
+      "identico_byte_a_byte": true
+    },
+    {
+      "original": "dist/CAJA_AYACUCHO_00_PRUEBA_HTTP.zip.sha256",
+      "copia_revision": "dist/CAJA_AYACUCHO_00_PRUEBA_HTTP.zip.sha256",
+      "sha256": "8bc301689930e189b90c8a858368d48297328ea031f38f25576849f369e4f4bc",
+      "bytes": 99,
+      "identico_byte_a_byte": true
+    }
+  ]
+}

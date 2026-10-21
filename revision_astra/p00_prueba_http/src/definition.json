@@ -1,0 +1,223 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+    },
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "manual": {
+      "type": "Request",
+      "kind": "Button",
+      "inputs": {
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      }
+    }
+  },
+  "actions": {
+    "PARAM_URL_PRUEBAS": {
+      "type": "Compose",
+      "inputs": "https://pendiente-url-pruebas.invalid/health",
+      "runAfter": {}
+    },
+    "URL_NORMALIZADA": {
+      "type": "Compose",
+      "inputs": "@trim(string(outputs('PARAM_URL_PRUEBAS')))",
+      "runAfter": {
+        "PARAM_URL_PRUEBAS": [
+          "Succeeded"
+        ]
+      }
+    },
+    "BLOQUEAR_CONFIGURACION_PENDIENTE": {
+      "type": "If",
+      "expression": "@or(empty(outputs('URL_NORMALIZADA')),contains(toLower(outputs('URL_NORMALIZADA')),'pendiente-url-pruebas'),contains(toLower(outputs('URL_NORMALIZADA')),'.invalid'))",
+      "actions": {
+        "DETENER_CONFIGURACION_PENDIENTE": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed",
+            "runError": {
+              "code": "CONFIGURACION_PENDIENTE",
+              "message": "Configure PARAM_URL_PRUEBAS con la URL HTTPS completa de pruebas terminada en /health. No se envió ninguna petición HTTP."
+            }
+          },
+          "runAfter": {}
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "runAfter": {
+        "URL_NORMALIZADA": [
+          "Succeeded"
+        ]
+      }
+    },
+    "PARSEAR_URL": {
+      "type": "Scope",
+      "actions": {
+        "PARTES_URL": {
+          "type": "Compose",
+          "inputs": {
+            "esquema": "@uriScheme(outputs('URL_NORMALIZADA'))",
+            "host": "@uriHost(outputs('URL_NORMALIZADA'))",
+            "ruta": "@uriPath(outputs('URL_NORMALIZADA'))",
+            "consulta": "@uriQuery(outputs('URL_NORMALIZADA'))"
+          },
+          "runAfter": {}
+        }
+      },
+      "runAfter": {
+        "BLOQUEAR_CONFIGURACION_PENDIENTE": [
+          "Succeeded"
+        ]
+      }
+    },
+    "DETENER_URL_NO_INTERPRETABLE": {
+      "type": "Terminate",
+      "inputs": {
+        "runStatus": "Failed",
+        "runError": {
+          "code": "CONFIGURACION_INVALIDA",
+          "message": "La URL no se puede interpretar. Use una URL HTTPS de pruebas terminada en /health, sin credenciales ni parámetros."
+        }
+      },
+      "runAfter": {
+        "PARSEAR_URL": [
+          "Failed",
+          "TimedOut"
+        ]
+      }
+    },
+    "VALIDAR_URL": {
+      "type": "If",
+      "expression": "@and(equals(toLower(outputs('PARTES_URL')?['esquema']),'https'),not(empty(outputs('PARTES_URL')?['host'])),equals(outputs('PARTES_URL')?['ruta'],'/health'),empty(outputs('PARTES_URL')?['consulta']),not(contains(outputs('URL_NORMALIZADA'),'@')),not(contains(outputs('URL_NORMALIZADA'),'#')),not(contains(outputs('URL_NORMALIZADA'),'?')),not(contains(outputs('URL_NORMALIZADA'),' ')),not(contains(outputs('URL_NORMALIZADA'),decodeUriComponent('%5C'))),not(contains(outputs('URL_NORMALIZADA'),decodeUriComponent('%0A'))),not(contains(outputs('URL_NORMALIZADA'),decodeUriComponent('%0D'))),not(contains(outputs('URL_NORMALIZADA'),decodeUriComponent('%09'))))",
+      "actions": {},
+      "else": {
+        "actions": {
+          "DETENER_CONFIGURACION_INVALIDA": {
+            "type": "Terminate",
+            "inputs": {
+              "runStatus": "Failed",
+              "runError": {
+                "code": "CONFIGURACION_INVALIDA",
+                "message": "Use una URL HTTPS de pruebas con ruta exacta /health, sin usuario, contraseña, query, fragmento ni espacios. No se envió ninguna petición HTTP."
+              }
+            },
+            "runAfter": {}
+          }
+        }
+      },
+      "runAfter": {
+        "PARSEAR_URL": [
+          "Succeeded"
+        ]
+      }
+    },
+    "HTTP_HEALTH": {
+      "type": "Http",
+      "inputs": {
+        "method": "GET",
+        "uri": "@outputs('URL_NORMALIZADA')",
+        "retryPolicy": {
+          "type": "None"
+        }
+      },
+      "limit": {
+        "timeout": "PT30S"
+      },
+      "operationOptions": "DisableAsyncPattern",
+      "runAfter": {
+        "VALIDAR_URL": [
+          "Succeeded"
+        ]
+      }
+    },
+    "DIAGNOSTICO_HTTP": {
+      "type": "Compose",
+      "inputs": {
+        "estado_accion": "@actions('HTTP_HEALTH')?['status']",
+        "codigo_http": "@int(coalesce(actions('HTTP_HEALTH')?['outputs']?['statusCode'],0))",
+        "codigo_error": "@string(coalesce(actions('HTTP_HEALTH')?['error']?['code'],''))",
+        "cuerpo_respuesta": "@take(string(coalesce(actions('HTTP_HEALTH')?['outputs']?['body'],'')),1000)"
+      },
+      "runAfter": {
+        "HTTP_HEALTH": [
+          "Succeeded",
+          "Failed",
+          "TimedOut"
+        ]
+      }
+    },
+    "ESTADO_RESULTADO": {
+      "type": "Compose",
+      "inputs": "@if(and(greaterOrEquals(outputs('DIAGNOSTICO_HTTP')?['codigo_http'],100),not(and(greaterOrEquals(outputs('DIAGNOSTICO_HTTP')?['codigo_http'],200),less(outputs('DIAGNOSTICO_HTTP')?['codigo_http'],300)))),'ERROR_HTTP',if(and(equals(outputs('DIAGNOSTICO_HTTP')?['estado_accion'],'Succeeded'),greaterOrEquals(outputs('DIAGNOSTICO_HTTP')?['codigo_http'],200),less(outputs('DIAGNOSTICO_HTTP')?['codigo_http'],300)),'RESPUESTA_SATISFACTORIA',if(or(equals(outputs('DIAGNOSTICO_HTTP')?['estado_accion'],'TimedOut'),contains(toLower(outputs('DIAGNOSTICO_HTTP')?['codigo_error']),'timeout'),contains(toLower(outputs('DIAGNOSTICO_HTTP')?['codigo_error']),'timedout')),'TIMEOUT',if(equals(outputs('DIAGNOSTICO_HTTP')?['codigo_http'],0),'FALLO_CONEXION','ERROR_TECNICO'))))",
+      "runAfter": {
+        "DIAGNOSTICO_HTTP": [
+          "Succeeded"
+        ]
+      }
+    },
+    "RESULTADO": {
+      "type": "Compose",
+      "inputs": {
+        "estado": "@outputs('ESTADO_RESULTADO')",
+        "mensaje": "@if(equals(outputs('ESTADO_RESULTADO'),'RESPUESTA_SATISFACTORIA'),'GET /health respondió con HTTP 2xx. La semántica del cuerpo sigue pendiente de confirmar.',if(equals(outputs('ESTADO_RESULTADO'),'ERROR_HTTP'),concat('GET /health devolvió HTTP ',string(outputs('DIAGNOSTICO_HTTP')?['codigo_http']),'. Revise la API de pruebas; no se reintentó.'),if(equals(outputs('ESTADO_RESULTADO'),'TIMEOUT'),'La petición agotó el tiempo de espera. Revise disponibilidad y latencia de la API de pruebas.',if(equals(outputs('ESTADO_RESULTADO'),'FALLO_CONEXION'),'No se obtuvo una respuesta HTTP. Revise URL, DNS, TLS, conectividad y políticas del entorno.','La acción HTTP falló pese a tener un código 2xx. Revise el detalle técnico en su historial.'))))",
+        "codigo_http": "@outputs('DIAGNOSTICO_HTTP')?['codigo_http']",
+        "estado_accion": "@outputs('DIAGNOSTICO_HTTP')?['estado_accion']",
+        "codigo_error": "@outputs('DIAGNOSTICO_HTTP')?['codigo_error']",
+        "cuerpo_respuesta_hasta_1000_caracteres": "@outputs('DIAGNOSTICO_HTTP')?['cuerpo_respuesta']"
+      },
+      "runAfter": {
+        "ESTADO_RESULTADO": [
+          "Succeeded"
+        ]
+      }
+    },
+    "FINALIZAR": {
+      "type": "If",
+      "expression": "@equals(outputs('ESTADO_RESULTADO'),'RESPUESTA_SATISFACTORIA')",
+      "actions": {
+        "TERMINAR_OK": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Succeeded"
+          },
+          "runAfter": {}
+        }
+      },
+      "else": {
+        "actions": {
+          "TERMINAR_ERROR": {
+            "type": "Terminate",
+            "inputs": {
+              "runStatus": "Failed",
+              "runError": {
+                "code": "@outputs('ESTADO_RESULTADO')",
+                "message": "@outputs('RESULTADO')?['mensaje']"
+              }
+            },
+            "runAfter": {}
+          }
+        }
+      },
+      "runAfter": {
+        "RESULTADO": [
+          "Succeeded"
+        ]
+      }
+    }
+  },
+  "outputs": {}
+}

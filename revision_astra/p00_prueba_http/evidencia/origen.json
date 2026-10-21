@@ -1,0 +1,48 @@
+{
+  "repository": "Lothbrok338/control-depositos-cbba",
+  "branch": "deploy/p10-api",
+  "commit": "456ca36efb3124e34295c911aff7833f6a7eacdb",
+  "consultado_fecha_local": "2026-10-21",
+  "zona_horaria": "America/La_Paz",
+  "acceso": "GitHub conectado; lecturas fijadas al commit; sin escrituras remotas",
+  "development_branch": "caja-ayacucho/p00-prueba-http",
+  "files": {
+    "P0_CARGA_EXTRACTOS_BANCARIOS_CLOUD_V5.zip": {
+      "git_blob_sha": "8bb90abf67fa80316c52ae76ff0be9a6e3967ab0",
+      "sha256": "97fb8a7459868c355c051a7737943b44e6a66e0bdeeff9b8354a0492e085a7c2",
+      "bytes": 5716,
+      "url": "https://github.com/Lothbrok338/control-depositos-cbba/blob/456ca36efb3124e34295c911aff7833f6a7eacdb/P0_CARGA_EXTRACTOS_BANCARIOS_CLOUD_V5.zip"
+    },
+    "p0/flujo/construir.py": {
+      "git_blob_sha": "8216ad4ae914daee706853591f4178c3a6e063fa",
+      "sha256": "6ae7d7249fe57dfefd7817e63a39ee50f9f2d36adf9c3b19836cdda7584242ad",
+      "bytes": 22958,
+      "url": "https://github.com/Lothbrok338/control-depositos-cbba/blob/456ca36efb3124e34295c911aff7833f6a7eacdb/p0/flujo/construir.py"
+    },
+    "p0/flujo/P0_CARGA_EXTRACTOS_BANCARIOS_CLOUD_definition.json": {
+      "git_blob_sha": "11e2aad023c341362dd9bcdafe3a4aa62f34fda5",
+      "sha256": "f09963cc8b45025fe77c4364a38acb42fbf4ab9a03f8e5134dca83e071ba4697",
+      "bytes": 33191,
+      "url": "https://github.com/Lothbrok338/control-depositos-cbba/blob/456ca36efb3124e34295c911aff7833f6a7eacdb/p0/flujo/P0_CARGA_EXTRACTOS_BANCARIOS_CLOUD_definition.json"
+    },
+    "p0/flujo/INSTRUCCIONES_IMPORTACION.md": {
+      "git_blob_sha": "79a879cffc5d6897f203838ef138e2c503cb4a95",
+      "sha256": "7091b790cc72d9de8a7cfdb74d9ea96c05fe24b39d36065d3cbad2b208bb9a48",
+      "bytes": 6299,
+      "url": "https://github.com/Lothbrok338/control-depositos-cbba/blob/456ca36efb3124e34295c911aff7833f6a7eacdb/p0/flujo/INSTRUCCIONES_IMPORTACION.md"
+    },
+    "p9/wdl.py": {
+      "git_blob_sha": "48e1af878f378767c4764f0eb08c439301ce1fc3",
+      "sha256": "6e7021bbcce4248b18b5ab278d893d8c03275052081e82f1710c929d7adf7ead",
+      "bytes": 3590,
+      "url": "https://github.com/Lothbrok338/control-depositos-cbba/blob/456ca36efb3124e34295c911aff7833f6a7eacdb/p9/wdl.py"
+    }
+  },
+  "schema": {
+    "url": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json",
+    "sha256": "7795118ae8a8dcfe7bdf0b84229be08cde8bc7ebd9eeac9e6c372746c520499d",
+    "local": "vendor/workflowdefinition.schema.json"
+  },
+  "remote_publication": false,
+  "remote_deployment_guarantee": "No se verificaron integraciones de despliegue externas. Se eligió repositorio local sin remotos ni publicación."
+}

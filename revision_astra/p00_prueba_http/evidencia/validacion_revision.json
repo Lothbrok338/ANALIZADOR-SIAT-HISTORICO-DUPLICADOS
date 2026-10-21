@@ -1,0 +1,141 @@
+{
+  "fecha": "2026-10-21T12:27:59.572014-04:00",
+  "tipo": "Nueva ejecución de las pruebas originales desde la copia de revisión",
+  "commit_desarrollo": "06232da9f7602b92696c1c4be57dbe25be04efec",
+  "sha256_zip": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d",
+  "comando_revision": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "tests/ejecutar_revision.py",
+    "--referencias",
+    "/workspace/referencias-caja-ayacucho",
+    "--informe",
+    "evidencia/validacion_revision.json"
+  ],
+  "comando_validador_en_directorio_temporal": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-B",
+    "pruebas/validar.py",
+    "--referencias",
+    "/workspace/referencias-caja-ayacucho",
+    "--informe",
+    "resultado_revision.json"
+  ],
+  "sha256_adaptador": "ef5fc494a0b04cfdedb00c50169bb51c7da95c82f434627612a7c1a83b076653",
+  "sha256_entradas": {
+    "src/construir.py": "9fe40ecd3361ad32fab8ad3ac30774c22f128b34480235c9cefe70fbe82ac5fd",
+    "src/definition.json": "22d10835dec6e084571a6b1b603d2ce78d23eba2bef5bf1cb8d3e7cc6f779388",
+    "tests/validar.py": "0468fcf57b66890dc7168b543e8510f68c469b2cc65ed969c54a623aa36ac21f",
+    "tests/expresiones.py": "944301f49db211bec73040501e9b35cf31ab43a4a7da25149ef5613aae7bbeff",
+    "src/vendor/workflowdefinition.schema.json": "7795118ae8a8dcfe7bdf0b84229be08cde8bc7ebd9eeac9e6c372746c520499d",
+    "src/vendor/README.md": "9cc12feaaa2bc6126b1f19fae611c30b0e6f1ed543765e4fe1f13a7bba68650a",
+    "src/requirements-validacion.txt": "756cc9e506ae4ee1a6f6c0507088b5cfc0dc8ba350fb2d2d46f1ffa72033adb6",
+    "evidencia/origen.json": "18437f2f979c8c46507324d1f37114d379f2d0571a935670b21a6b96900cce27",
+    "evidencia/validacion_original.json": "4b0cd0a2401d5ed7a410615d9fd07a0c6f912e71c4d01c9b93a1f0a8f39eef97",
+    "INFORME_VALIDACION.md": "9c646f8a717e1c1158510cb8b77c0fd9fc077952c7a559bf178bffd652aa925a",
+    "INSTRUCCIONES_IMPORTACION.md": "f27171520be45a7bc864e78874f91e7c025127feb71de19269443a8361a2d71a",
+    "dist/CAJA_AYACUCHO_00_PRUEBA_HTTP.zip": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d",
+    "dist/CAJA_AYACUCHO_00_PRUEBA_HTTP.zip.sha256": "8bc301689930e189b90c8a858368d48297328ea031f38f25576849f369e4f4bc"
+  },
+  "stdout_completo": "PASS integridad_zip_y_json_estricto\nPASS estructura_identidad_dependencias_y_destinos\nPASS definicion_auxiliares_y_todos_los_json\nPASS grafo_guardas_http_timeout_y_errores\nPASS casos_sinteticos_expresiones\nPASS sensibilidad_del_validador\nPASS esquema_publicado_wdl\nPASS regeneracion_determinista\nPASS sha256_entregable\nPASS referencias_fijadas_y_metodo_de_empaquetado\n10 grupos; resultado: PASS\n",
+  "stderr_completo": "",
+  "codigo_salida": 0,
+  "resultado_validador_original": {
+    "fecha": "2026-10-21T12:27:59.556938-04:00",
+    "tipo": "Validación estática; sin importación ni ejecución en tenant",
+    "comando": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "pruebas/validar.py",
+      "--referencias",
+      "/workspace/referencias-caja-ayacucho",
+      "--informe",
+      "resultado_revision.json"
+    ],
+    "python": "3.12.14",
+    "pruebas": [
+      {
+        "prueba": "integridad_zip_y_json_estricto",
+        "resultado": "PASS",
+        "detalle": {
+          "archivos_json": 5,
+          "bytes": 3411
+        }
+      },
+      {
+        "prueba": "estructura_identidad_dependencias_y_destinos",
+        "resultado": "PASS",
+        "detalle": {
+          "recursos_flujo": 1,
+          "conexiones": 0,
+          "nombre": "CAJA AYACUCHO - 00 PRUEBA HTTP"
+        }
+      },
+      {
+        "prueba": "definicion_auxiliares_y_todos_los_json",
+        "resultado": "PASS",
+        "detalle": {
+          "json_locales_leidos": 9
+        }
+      },
+      {
+        "prueba": "grafo_guardas_http_timeout_y_errores",
+        "resultado": "PASS",
+        "detalle": null
+      },
+      {
+        "prueba": "casos_sinteticos_expresiones",
+        "resultado": "PASS",
+        "detalle": {
+          "casos_url": 19,
+          "casos_resultado": 19,
+          "tipo": "evaluación local limitada; no ejecución Power Automate"
+        }
+      },
+      {
+        "prueba": "sensibilidad_del_validador",
+        "resultado": "PASS",
+        "detalle": {
+          "mutaciones_rechazadas": 9
+        }
+      },
+      {
+        "prueba": "esquema_publicado_wdl",
+        "resultado": "PASS",
+        "detalle": {
+          "esquema": "Microsoft Logic Apps WDL; no certifica importador de paquetes Power Automate",
+          "errores": 0
+        }
+      },
+      {
+        "prueba": "regeneracion_determinista",
+        "resultado": "PASS",
+        "detalle": {
+          "reconstrucciones_limpias": 2,
+          "comparacion": "byte a byte"
+        }
+      },
+      {
+        "prueba": "sha256_entregable",
+        "resultado": "PASS",
+        "detalle": "7d8816b1bf874771b63faffd5a83e20c956ec7e195bb7392690c1aa121078a2d"
+      },
+      {
+        "prueba": "referencias_fijadas_y_metodo_de_empaquetado",
+        "resultado": "PASS",
+        "detalle": {
+          "commit": "456ca36efb3124e34295c911aff7833f6a7eacdb",
+          "archivos_comprobados": 5,
+          "identificadores_heredados": 0
+        }
+      }
+    ],
+    "resultado": "PASS",
+    "limitaciones": [
+      "El evaluador local no implementa el motor Power Automate.",
+      "El esquema WDL no certifica el importador de paquetes ni valida semántica de expresiones.",
+      "Timeout efectivo, número de solicitudes de red, redirecciones, licencia Premium y DLP pendientes de prueba real.",
+      "Cancelación manual de una ejecución no garantiza que se ejecute su diagnóstico."
+    ]
+  },
+  "copias_originales_sin_modificar": true,
+  "estado": "Validación estática realizada. Importación y ejecución en el tenant pendientes."
+}
